@@ -1,0 +1,19 @@
+{
+  "name": "iota-archive-exporter",
+  "version": "0.1.0",
+  "description": "Node.js Exporter for IOTA Archive",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcusjang/iota-archive-exporter.git"
+  },
+  "keywords": [
+    "IOTA",
+    "Permanode"
+  ],
+  "author": "Marcus Jang <makerpopo@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "zeromq": "^4.6.0"
+  }
+}
