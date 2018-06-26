@@ -1,12 +1,18 @@
 IOTA Archive - Exporter Specifications
 ===
 ## ToC
-* [Table of Contents](#ToC)
-* [Scope](#Scope)
-* [Input & Output](#Input-amp-Output)
-* [Environment & Dependencies](#Environment-amp-Dependencies)
-* [Technical & Design Decisions](#Technical-amp-Design-Decisions)
-* [References](#References)
+* [Table of Contents](#toc)
+* [Usage](#usage)
+* [Scope](#scope)
+* [Input & Output](#input--output)
+* [Environment & Dependencies](#environment--dependencies)
+* [Technical & Design Decisions](#technical--design-Decisions)
+* [References](#references)
+
+## Usage
+    git clone https://github.com/marcusjang/iota-archive-exporter.git
+    cd iota-archive-exporter
+    node index [IRI API PORT=14265] [ZMQ TCP PORT=5556]
 
 ## Scope
 1. IOTA Archive Exporter takes the transaction database from old versions of IOTA Reference Implementation(IRI) and streams the data in a more easy-to-read format.
