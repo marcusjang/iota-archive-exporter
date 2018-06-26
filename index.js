@@ -9,7 +9,6 @@ const pool = new http.Agent({ maxSockets: 64 });
 const zmq = require('zeromq');
 const sock = zmq.socket('pub');
 
-const Converter = require('./lib/converter'); // from iota.lib.js
 const { Tx, Tx_trytes, Sn } = require('./lib/MessageQ');
 
 // Functions
