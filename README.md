@@ -12,7 +12,10 @@ IOTA Archive - Exporter Specifications
 ## Usage
     git clone https://github.com/marcusjang/iota-archive-exporter.git
     cd iota-archive-exporter
+    npm install
     node index [IRI API PORT=14265] [ZMQ TCP PORT=5556]
+
+IRI API port and ZMQ TCP port arguments are optional, and defaults to 14265 and 5556 respectively.
 
 ## Scope
 1. IOTA Archive Exporter takes the transaction database from old versions of IOTA Reference Implementation(IRI) and streams the data in a more easy-to-read format.
