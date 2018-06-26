@@ -1,5 +1,5 @@
-const API_PORT = process.argv[2] | 14265;
-const ZMQ_PORT = process.argv[3] | 5556;
+const API_PORT = process.argv[2] || 14265;
+const ZMQ_PORT = process.argv[3] || 5556;
 const DELAY = 5; // in miliseconds
 
 // Necessary libraries
@@ -127,7 +127,7 @@ let counter = 0;
 	const { latestSolidSubtangleMilestone } = await request({ command: 'getNodeInfo' });
 	queueBackward.push(latestSolidSubtangleMilestone);
 	
-	sock.bindSync('tcp://127.0.0.1:5557');
+	sock.bindSync('tcp://127.0.0.1:' + ZMQ_PORT);
 
 	// First traverse backwards towards the milestone, publishing confirmed transactions
 	while (queueBackward.length > 0) {
