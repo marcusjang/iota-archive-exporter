@@ -76,6 +76,7 @@ const traverseForward = async txhash => {
 				const msgs = new Array();
 				msgs.push(new Tx(tx, trytes));
 				msgs.push(new Tx_trytes(tx, trytes));
+				msgs.push(new Sn('9'.repeat(81), [tx]));
 				publish(msgs);
 				save(tx);
 			}
