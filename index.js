@@ -70,18 +70,18 @@ const publish = messages => {
 const traverseForward = async txhash => {
 	const { hashes } = await request({ command: 'findTransactions', approvees: [txhash] });
 	hashes.forEach(async tx => {
-		if (!seenForward.includes(tx)) {
-			if (!db.includes(tx)) {
+		if (!seenForward.has(tx)) {
+			if (!db.has(tx)) {
 				const trytes = await getTrytes(tx);
 				const msgs = new Array();
 				msgs.push(new Tx(tx, trytes));
 				msgs.push(new Tx_trytes(tx, trytes));
 				msgs.push(new Sn('9'.repeat(81), [tx]));
 				publish(msgs);
-				save(tx);
+				db.add(tx);
 			}
 			queueForward.push(tx);
-			seenForward.push(tx);
+			seenForward.add(tx);
 		}
 	});
 	queueForward.shift();
@@ -90,24 +90,24 @@ const traverseForward = async txhash => {
 const traverseBackward = async txhash => {
 	const trytes = await getTrytes(txhash);
 
-	if (!db.includes(txhash)) {
+	if (!db.has(txhash)) {
 		const trytes = await getTrytes(txhash);
 		const msgs = new Array();
 		msgs.push(new Tx(txhash, trytes));
 		msgs.push(new Tx_trytes(txhash, trytes));
 		publish(msgs);
-		db.push(txhash);
+		db.add(txhash);
 	}
 
 	const parents = [ trytes.slice(2430, 2511), trytes.slice(2511, 2592) ];
 	parents.forEach(async tx => {
-		if (!seenBackward.includes(tx)) {
+		if (!seenBackward.has(tx)) {
 			if (tx === '9'.repeat(81)) {
 				// reached the genesis. traversing forwards again...
 				queueForward.push(txhash);
 			} else {
 				queueBackward.push(tx);
-				seenBackward.push(tx);
+				seenBackward.add(tx);
 			}
 		}
 	});
@@ -115,11 +115,11 @@ const traverseBackward = async txhash => {
 };
 
 // Declerations
-const seenBackward = new Array();
-const seenForward = new Array();
+const seenBackward = new Set();
+const seenForward = new Set();
 const queueBackward = new Array();
 const queueForward = new Array();
-const db = new Array();
+const db = new Set();
 let counter = 0;
 
 
