@@ -120,7 +120,7 @@ const getNodeSyncState = async () => {
 		latestMilestoneIndex: lmi,
 		latestSolidSubtangleMilestone : lsm,
 		latestSolidSubtangleMilestoneIndex: lsmi
-	} = await request({ command: 'getNodeInfo' })
+	} = await request({ command: 'getNodeInfo' });
 	
 	return { lm, lmi, lsm, lsmi };
 }
