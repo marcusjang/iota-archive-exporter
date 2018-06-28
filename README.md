@@ -1,7 +1,7 @@
 IOTA Archive - Exporter Specifications
 ===
-## ToC
-* [Table of Contents](#toc)
+## Table of Contents
+* [Table of Contents](#table-of-contents)
 * [Usage](#usage)
 * [Scope](#scope)
 * [Input & Output](#input--output)
@@ -51,7 +51,37 @@ IRI API port and ZMQ TCP port arguments are optional, and defaults to 14265 and 
 * [iota.lib.js/lib/crypto/converter/converter.js](https://github.com/iotaledger/iota.lib.js/blob/develop/lib/crypto/converter/converter.js)
 
 ## Technical & Design Decisions
-    To be discussed further
+### Basic Design Decisions
+IOTA Archive Exporter is one of the three apps to consist the "archiving" part of the IOTA Archive.
+
+    ┌─────────────┐          ┌──────────┐
+    │   Old IRI   │ =[API]=> │ Exporter │ ==|
+    └─────────────┘          └──────────┘   |          ┌──────────┐                 ┌────────────┐
+      (historical)                          |==[ZMQ]=> │ Importer │ =[DB Adapter]=> │ DB Storage │ 
+    ┌─────────────┐                         |          └──────────┘                 └────────────┘
+    │ Current IRI │ ========================|
+    └─────────────┘ 
+      (live feed)
+    
+It was chosen to employ ZMQ pub/sub model, akin to the IRI's implementation, as the output format so only one importer would be necessary. Compared to reading the database directly, there are a few pros and cons.
+
+#### Pros
+* Compatibility: Necessary APIs haven't changed since the first version of IRI, unlike the DB structure, which was changed to RocksDB down the line
+* Less dependencies: Since this app only requires http request function to interact with the DB backups, the only necessary dependency is the ZMQ library. This is also easier to build and maintain, due to its minimal design.
+
+#### Cons
+* Requires IRI running: Not only it requires DB backups, it also requires appropriate versions of IRI running, essentially acting as a dependency of sorts. Also, this makes it harder to automate.
+
+### Future-proofedness
+There are a few things in the design that have some probablity of being changed in the future, to follow changes in IRI. To name a couple:
+
+* Changes in the ZMQ stream format, and
+* Coordinator-less network that doesn't utilise milestones, a.k.a. changes in confirmation model
+
+Although these are significant changes that will certainly require a new version of the exporter, the rest of the app should be fairly agnostic of the IRI version.
+
+### Notes
+* A more fine tuning may be required on the artificial delaying, so it wouldn't crash old IRI API endpoint and take 
 
 ## References
 * [iota.lib.js TransactionObject Structure](https://github.com/iotaledger/iota.lib.js/blob/develop/lib/utils/utils.js#L169)
