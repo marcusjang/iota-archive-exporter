@@ -114,6 +114,17 @@ const traverseBackward = async txhash => {
 	queueBackward.shift();
 };
 
+const getNodeSyncState = async () => {
+	const {
+		latestMilestone: lm,
+		latestMilestoneIndex: lmi,
+		latestSolidSubtangleMilestone : lsm,
+		latestSolidSubtangleMilestoneIndex: lsmi
+	} = await request({ command: 'getNodeInfo' })
+	
+	return { lm, lmi, lsm, lsmi };
+}
+
 // Declerations
 const seenBackward = new Set();
 const seenForward = new Set();
@@ -125,8 +136,16 @@ let counter = 0;
 
 // Do the thang
 (async () => {
-	const { latestSolidSubtangleMilestone } = await request({ command: 'getNodeInfo' });
-	queueBackward.push(latestSolidSubtangleMilestone);
+	let { lm, lmi, lsm, lsmi } = await getNodeSyncState();
+	
+	// Check the sync state of the node first
+	while (lsm === '9'.repeat(81) || lmi !== lsmi) {
+		setTimeout(() => {
+			({ lm, lmi, lsm, lsmi } = await getNodeSyncState());
+		}), 750);
+	}
+	
+	queueBackward.push(lsm);
 	
 	sock.bindSync('tcp://127.0.0.1:' + ZMQ_PORT);
 
