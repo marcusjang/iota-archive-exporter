@@ -40,7 +40,7 @@ IRI API port and ZMQ TCP port arguments are optional, and defaults to 14265 and 
         * `tx_trytes` for (new) transaction raw trytes
         * `sn` for milestone issuances and approvees
 
-           > At the time of building the prototype, unlike the IRI the `sn` topic doesn't use the correct milestone, but rather uses the latest milestone prior to the snapshot. 
+           > At the time of building the prototype, unlike the IRI the `sn` topic doesn't use the correct milestone, but rather uses the ~latest milestone prior to the snapshot~ all nines (`'9'.repeat(81)`) in lieu of the milestone. 
 
 ## Environment & Dependencies
 
@@ -81,7 +81,8 @@ There are a few things in the design that have some probablity of being changed 
 Although these are significant changes that will certainly require a new version of the exporter, the rest of the app should be fairly agnostic of the IRI version.
 
 ### Notes
-* A more fine tuning may be required on the artificial delaying, so it wouldn't crash old IRI API endpoint and take 
+* A more fine tuning may be required on the artificial delaying, so it wouldn't crash old IRI API endpoint or take too long unnecessarily.
+* A more accurate `sn` topic could be beneficial, but this may bloat the codebase while serving little purpose.
 
 ## References
 * [iota.lib.js TransactionObject Structure](https://github.com/iotaledger/iota.lib.js/blob/develop/lib/utils/utils.js#L169)
