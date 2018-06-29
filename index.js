@@ -76,7 +76,6 @@ const traverseForward = async txhash => {
 				const msgs = new Array();
 				msgs.push(new Tx(tx, trytes));
 				msgs.push(new Tx_trytes(tx, trytes));
-				msgs.push(new Sn('9'.repeat(81), [tx]));
 				publish(msgs);
 				db.add(tx);
 			}
@@ -91,10 +90,10 @@ const traverseBackward = async txhash => {
 	const trytes = await getTrytes(txhash);
 
 	if (!db.has(txhash)) {
-		const trytes = await getTrytes(txhash);
 		const msgs = new Array();
 		msgs.push(new Tx(txhash, trytes));
 		msgs.push(new Tx_trytes(txhash, trytes));
+		msgs.push(new Sn('9'.repeat(81), [txhash]));
 		publish(msgs);
 		db.add(txhash);
 	}
@@ -135,19 +134,27 @@ let counter = 0;
 
 
 // Do the thang
-(async () => {
+console.log('Initializing ZMQ publishing stream...');
+sock.bindSync('tcp://127.0.0.1:' + ZMQ_PORT);
+
+setTimeout(async () => {
+
+	console.log('Trying to connect to the IRI API endpoint...');
 	let { lm, lmi, lsm, lsmi } = await getNodeSyncState();
 	
 	// Check the sync state of the node first
-	while (lsm === '9'.repeat(81) || lmi !== lsmi) {
-		setTimeout(() => {
+	while (lsm === '9'.repeat(81) /* || lmi !== lsmi */) {
+		console.log(lsm);
+		console.log(lmi, lsmi);
+		console.log('IRI is not solid yet, trying again soon...');
+		setTimeout(async () => {
 			({ lm, lmi, lsm, lsmi } = await getNodeSyncState());
-		}), 750);
+		}, 750);
 	}
 	
+	console.log('Successfully retrived the latest solid subtangle milestone, traversing...');
 	queueBackward.push(lsm);
 	
-	sock.bindSync('tcp://127.0.0.1:' + ZMQ_PORT);
 
 	// First traverse backwards towards the milestone, publishing confirmed transactions
 	while (queueBackward.length > 0) {
@@ -164,4 +171,4 @@ let counter = 0;
 
 	// Not sure if needed, but delete seen forward transactions object since we're done here
 	delete seenForward;
-})();
+}, 1000);
