@@ -11,8 +11,8 @@ const API = new Requester(argv.input, DELAY);
 
 const { TraverseForward, TraverseBackward } = require('./lib/traverse');
 const Traverse = {
-	forward = new TraverseForward(counter),
-	backward = new TraverseBackward(counter)
+	forward = new TraverseForward(),
+	backward = new TraverseBackward()
 }
 
 Traverse.forward.publish = async hash => {
