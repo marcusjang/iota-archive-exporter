@@ -18,14 +18,14 @@ const Traverse = {
 Traverse.forward.publish = async hash => {
 	if (!db.has(hash)) {
 		const trytes = await API.getTrytes(hash);
-		Exporter.export(hash, trytes, index++);
+		Export.export(hash, trytes, index++);
 		db.add(hash);
 	}
 }
 
 Traverse.backward.publish = async (hash, trytes) => {
 	if (!db.has(hash)) {
-		Exporter.export(hash, trytes, index++, true);
+		Export.export(hash, trytes, index++, true);
 		db.add(hash);
 	}
 }
@@ -41,7 +41,7 @@ let index = 0;
 // Do the thang
 
 (async () => {
-	await Exporter.init();
+	await Export.init();
 	
 	const lsm = await API.getSync();
 	
@@ -50,5 +50,5 @@ let index = 0;
 	await Traverse.backward.start();
 	await Traverse.forward.start();
 	
-	Exporter.close();
+	Export.close();
 })();
