@@ -1,15 +1,26 @@
-const API_PORT = process.argv[2] || 14265;
-const ZMQ_PORT = process.argv[3] || 5556;
 const DELAY = 5; // in miliseconds
+const DEFAULT_OPTS = {
+	method: 'ZMQ',
+	input: 14265,
+	output: 5556,
+	outputDir: 'dumps'
+};
+const ARGS_ALIAS = {
+	m: 'method',
+	i: 'input',
+	o: 'output',
+	d: 'outputDir'
+};
 
 // Necessary libraries
 const http = require('http');
 const pool = new http.Agent({ maxSockets: 64 });
-
-const zmq = require('zeromq');
-const sock = zmq.socket('pub');
-
-const { Tx, Tx_trytes, Sn } = require('./lib/MessageQ');
+const argv = require('minimist')(process.argv.slice(2), {
+	alias: ARGS_ALIAS,
+	default: DEFAULT_OPTS
+});
+const ExporterClass = require('./lib/' + argv.method);
+const Exporter = new ExporterClass(argv);
 
 // Functions
 const request = command => {
@@ -18,7 +29,7 @@ const request = command => {
 			const req = http.request({
 				protocol: 'http:',
 				hostname: 'localhost',
-				port: API_PORT,
+				port: argv.output,
 				method: 'POST',
 				agent: pool,
 				headers: {
@@ -60,23 +71,13 @@ const getTrytes = async txhash => {
 	return trytes[0];
 };
 
-const publish = messages => {
-	messages.forEach(msg => {
-		console.log(msg.string);
-		sock.send(msg.string);
-	});
-};
-
 const traverseForward = async txhash => {
 	const { hashes } = await request({ command: 'findTransactions', approvees: [txhash] });
 	hashes.forEach(async tx => {
 		if (!seenForward.has(tx)) {
 			if (!db.has(tx)) {
 				const trytes = await getTrytes(tx);
-				const msgs = new Array();
-				msgs.push(new Tx(tx, trytes));
-				msgs.push(new Tx_trytes(tx, trytes));
-				publish(msgs);
+				Exporter.export(tx, trytes);
 				db.add(tx);
 			}
 			queueForward.push(tx);
@@ -90,11 +91,7 @@ const traverseBackward = async txhash => {
 	const trytes = await getTrytes(txhash);
 
 	if (!db.has(txhash)) {
-		const msgs = new Array();
-		msgs.push(new Tx(txhash, trytes));
-		msgs.push(new Tx_trytes(txhash, trytes));
-		msgs.push(new Sn('9'.repeat(81), [txhash]));
-		publish(msgs);
+		Exporter.export(txhash, trytes, true);
 		db.add(txhash);
 	}
 
@@ -134,11 +131,10 @@ let counter = 0;
 
 
 // Do the thang
-console.log('Initializing ZMQ publishing stream...');
-sock.bindSync('tcp://127.0.0.1:' + ZMQ_PORT);
 
-setTimeout(async () => {
-
+(async () => {
+	await Exporter.init();
+	
 	console.log('Trying to connect to the IRI API endpoint...');
 	let { lm, lmi, lsm, lsmi } = await getNodeSyncState();
 	
@@ -171,4 +167,7 @@ setTimeout(async () => {
 
 	// Not sure if needed, but delete seen forward transactions object since we're done here
 	delete seenForward;
-}, 1000);
+	
+	
+	Exporter.close();
+})();
