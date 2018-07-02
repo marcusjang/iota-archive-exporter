@@ -38,7 +38,6 @@ class TraverseForward extends Traverse {
 			if (!this.seen.has(hash)) {
 				if (!db.has(hash)) {
 					const trytes = await API.getTrytes(hash);
-					const { hashes } = await request({ command: 'findTransactions', approvees: [txhash] });
 					Export.export(hash, trytes, index++);
 					db.add(hash);
 				}
@@ -65,8 +64,7 @@ class TraverseBackward extends Traverse {
 		const parents = [ trytes.slice(2430, 2511), trytes.slice(2511, 2592) ];
 		parents.forEach(async hash => {
 			if (!this.seen.has(hash)) {
-				if (tx === '9'.repeat(81)) {
-					console.log('reached the genesis');
+				if (hash === '9'.repeat(81)) {
 					traverse.forward.queue.push(hash);
 				} else {
 					this.queue.push(hash);
