@@ -13,58 +13,15 @@ const ARGS_ALIAS = {
 };
 
 // Necessary libraries
-const http = require('http');
-const pool = new http.Agent({ maxSockets: 64 });
 const argv = require('minimist')(process.argv.slice(2), {
 	alias: ARGS_ALIAS,
 	default: DEFAULT_OPTS
 });
 const ExporterClass = require('./lib/' + argv.method);
 const Exporter = new ExporterClass(argv);
-
-// Functions
-const request = command => {
-	return new Promise((resolve, reject) => {
-		try {
-			const req = http.request({
-				protocol: 'http:',
-				hostname: 'localhost',
-				port: argv.output,
-				method: 'POST',
-				agent: pool,
-				headers: {
-					'Content-Type': 'application/json',
-					'X-IOTA-API-Version': 1,
-					'Content-Length': Buffer.byteLength(JSON.stringify(command))
-				},
-			}, res => {
-				let data = '';
-
-				res.on('data', chunk => {
-					data += chunk;
-				});
-
-				res.on('end', () => {
-					const body = JSON.parse(data);
-					if ('error' in body) {
-						throw new Error(body.error);
-					}
-					setTimeout(resolve, DELAY, body);
-				});
-			});
-
-			req.on('error', err => {
-				throw err;
-			});
-
-			req.write(JSON.stringify(command));
-			req.end();
-		} catch (err) {
-			console.error(err);
-			reject(err);
-		}
-	});
-};
+const RequesterClass = require('./lib/requester');
+const Requester = new RequesterClass(argv.output, DELAY);
+const request = Requester.send
 
 const getTrytes = async txhash => {
 	let { trytes } = await request({ command: 'getTrytes', hashes: [txhash] });
@@ -150,7 +107,6 @@ let counter = 0;
 	
 	console.log('Successfully retrived the latest solid subtangle milestone, traversing...');
 	queueBackward.push(lsm);
-	
 
 	// First traverse backwards towards the milestone, publishing confirmed transactions
 	while (queueBackward.length > 0) {
