@@ -1,22 +1,7 @@
 const DELAY = 5; // in miliseconds
-const DEFAULT_OPTS = {
-	method: 'ZMQ',
-	input: 14265,
-	output: 5556,
-	outputDir: 'dumps'
-};
-const ARGS_ALIAS = {
-	m: 'method',
-	i: 'input',
-	o: 'output',
-	d: 'outputDir'
-};
 
 // Necessary libraries
-const argv = require('minimist')(process.argv.slice(2), {
-	alias: ARGS_ALIAS,
-	default: DEFAULT_OPTS
-});
+const argv = require('./lib/argv');
 
 const Exporter = require('./lib/' + argv.method);
 const Export = new Exporter(argv);
