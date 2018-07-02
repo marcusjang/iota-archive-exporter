@@ -1,6 +1,6 @@
 {
   "name": "iota-archive-exporter",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Node.js Exporter for IOTA Archive",
   "main": "index.js",
   "repository": {
@@ -14,6 +14,7 @@
   "author": "Marcus Jang <makerpopo@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "zeromq": "^4.6.0"
+    "zeromq": "^4.6.0",
+    "minimist": "^1.2.0"
   }
 }
