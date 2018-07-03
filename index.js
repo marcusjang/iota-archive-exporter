@@ -89,7 +89,7 @@ let index = 0;
 (async () => {
 	await Export.init();
 	
-	const lsm = await API.getSync();
+	const lsm = await API.getSync;
 	
 	traverse.backward.queue.push(lsm);
 	
