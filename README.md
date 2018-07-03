@@ -50,6 +50,7 @@ IOTA Archive - Exporter Specifications
 
 * Node.js v8.11 (or above)
 * [ZeroMQ node.js library](https://github.com/zeromq/zeromq.js)
+* [minimist](https://github.com/substack/minimist)
 * [iota.lib.js/lib/crypto/converter/converter.js](https://github.com/iotaledger/iota.lib.js/blob/develop/lib/crypto/converter/converter.js)
 
 ## Technical & Design Decisions
