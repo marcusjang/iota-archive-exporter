@@ -3,8 +3,8 @@ const DELAY = 3; // in miliseconds
 // Necessary libraries
 const argv = require('./lib/argv');
 
-const Exporter = require('./lib/exporters/' + argv.method);
-const Export = new Exporter(argv);
+const ZMQ = require('./lib/exporters/' + argv.method);
+const Exporter = new ZMQ(argv.output);
 
 const ApiRequester = require('./lib/requester');
 const API = new ApiRequester(argv.input, DELAY);
@@ -38,7 +38,7 @@ class TraverseForward extends Traverse {
 			if (!this.seen.has(hash)) {
 				if (!db.has(hash)) {
 					const trytes = await API.getTrytes(hash);
-					Export.export(hash, trytes, index++);
+					Exporter.export(hash, trytes, index++);
 					db.add(hash);
 				}
 				this.queue.push(hash);
@@ -57,7 +57,7 @@ class TraverseBackward extends Traverse {
 		const trytes = await API.getTrytes(tx);
 
 		if (!db.has(tx)) {
-			Export.export(tx, trytes, index++, true);
+			Exporter.export(tx, trytes, index++, true);
 			db.add(tx);
 		}
 
@@ -87,14 +87,17 @@ let index = 0;
 // Do the thang
 
 (async () => {
-	await Export.init();
+	await Exporter.init();
 	
 	const lsm = await API.getSync;
-	
+	const nodeInfo = await API.getNodeInfo;
 	traverse.backward.queue.push(lsm);
 	
+	Exporter.send(`set ${nodeInfo.appName} ${nodeInfo.appVersion} ${nodeInfo.latestSolidSubtangleMilestoneIndex} confirmed`);
 	await traverse.backward.start();
+	
+	Exporter.send(`set ${nodeInfo.appName} ${nodeInfo.appVersion} ${nodeInfo.latestSolidSubtangleMilestoneIndex} unconfirmed`);
 	await traverse.forward.start();
 	
-	Export.close();
+	Exporter.close();
 })();
