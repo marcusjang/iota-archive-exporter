@@ -3,7 +3,7 @@ const DELAY = 3; // in miliseconds
 // Necessary libraries
 const argv = require('./lib/argv');
 
-const Exporter = require('./lib/' + argv.method);
+const Exporter = require('./lib/exporters/' + argv.method);
 const Export = new Exporter(argv);
 
 const ApiRequester = require('./lib/requester');
