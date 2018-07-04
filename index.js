@@ -15,13 +15,16 @@ class Traverse {
 		this.queue = new Array();
 	}
 
-	start() {
+	start(info, set) {
+		const { appName, appVersion, latestSolidSubtangleMilestoneIndex: lsmi } = info;
 		return new Promise(async (resolve, reject) => {
+			Exporter.send(['info', appName, appVersion, lsmi, set]);
 			while(this.queue.length > 0) {
 				const entryPoint = this.queue.shift();
 				await this.traverse(entryPoint);
 			}
 			delete this.seen;
+			Exporter.send(['info', set, 'done']);
 			resolve();
 		});
 	}
@@ -90,14 +93,11 @@ let index = 0;
 	await Exporter.init();
 	
 	const lsm = await API.getSync;
-	const nodeInfo = await API.getNodeInfo;
+	const nodeInfo = await API.nodeInfo;
 	traverse.backward.queue.push(lsm);
 	
-	Exporter.send(`set ${nodeInfo.appName} ${nodeInfo.appVersion} ${nodeInfo.latestSolidSubtangleMilestoneIndex} confirmed`);
-	await traverse.backward.start();
-	
-	Exporter.send(`set ${nodeInfo.appName} ${nodeInfo.appVersion} ${nodeInfo.latestSolidSubtangleMilestoneIndex} unconfirmed`);
-	await traverse.forward.start();
+	await traverse.backward.start(nodeInfo, 'confirmed');
+	await traverse.forward.start(nodeInfo, 'unconfirmed');
 	
 	Exporter.close();
 })();
