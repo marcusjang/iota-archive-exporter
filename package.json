@@ -14,7 +14,6 @@
   "author": "Marcus Jang <makerpopo@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "zeromq": "^4.6.0",
-    "minimist": "^1.2.0"
+    "zeromq": "^4.6.0"
   }
 }
