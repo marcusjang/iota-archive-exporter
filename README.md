@@ -17,7 +17,6 @@ IOTA Archive - Exporter Specifications
         -i, --input [IRI API PORT=14265]
         -o, --output [ZMQ TCP PORT=5556]
         -m, --method [Exporter to use='ZMQ']
-        -d, --outputDir [Output directory name='dumps']
 
 ## Scope
 1. IOTA Archive Exporter takes the transaction database from old versions of IOTA Reference Implementation(IRI) and streams the data in a more easy-to-read format.
