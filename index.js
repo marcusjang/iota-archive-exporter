@@ -89,12 +89,12 @@ let index = 0;
 
 // Do the thang
 
-(async () => {
-	await Exporter.init();
-	
+(async () => {	
 	const lsm = await API.getSync;
 	const nodeInfo = await API.nodeInfo;
 	traverse.backward.queue.push(lsm);
+	
+	await Exporter.init();
 	
 	await traverse.backward.start(nodeInfo, 'confirmed');
 	await traverse.forward.start(nodeInfo, 'unconfirmed');
