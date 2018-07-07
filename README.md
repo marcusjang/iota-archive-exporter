@@ -39,8 +39,10 @@ IRI API port and ZMQ TCP port arguments are optional, and defaults to 14265 and 
         * `tx` for (new) transactions and their basic info
         * `tx_trytes` for (new) transaction raw trytes
         * `sn` for milestone issuances and approvees
+        
            > At the time of building the prototype, unlike the IRI the `sn` topic doesn't use the correct milestone, but rather uses the ~latest milestone prior to the snapshot~ all nines (`'9'.repeat(81)`) in lieu of the milestone. 
-        * `info` for additional export information, such as the start info, the stop info, `appName`, `appVersion`, `LSMI`, and the set name.
+           
+        * `info`, which is a non-standard addition, for additional export information, such as the start info, the stop info, `appName`, `appVersion`, `LSMI`, and the set name.
 
 ## Environment & Dependencies
 
