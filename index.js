@@ -18,13 +18,13 @@ class Traverse {
 	start(info, set) {
 		const { appName, appVersion, latestSolidSubtangleMilestoneIndex: lsmi } = info;
 		return new Promise(async (resolve, reject) => {
-			Exporter.send(['info', appName, appVersion, lsmi, set]);
+			Exporter.send(`info start ${appName} ${appVersion} ${lsmi} ${set}`);
 			while(this.queue.length > 0) {
 				const entryPoint = this.queue.shift();
 				await this.traverse(entryPoint);
 			}
 			delete this.seen;
-			Exporter.send(['info', set, 'done']);
+			Exporter.send(`info done ${set}`);
 			resolve();
 		});
 	}
@@ -37,6 +37,21 @@ class TraverseForward extends Traverse {
 	
 	async traverse(tx) {
 		const { hashes } = await API.send({ command: 'findTransactions', approvees: [tx] });
+		return hashes.reduce((promise, hash) => {
+			return promise.then(async () => {
+				if (!this.seen.has(hash)) {
+					if (!db.has(hash)) {
+						const trytes = await API.getTrytes(hash);
+						Exporter.export(hash, trytes, index++);
+						db.add(hash);
+					}
+					this.queue.push(hash);
+					this.seen.add(hash);
+				}
+			})
+		}, Promise.resolve());
+
+		/*
 		hashes.forEach(async hash => {
 			if (!this.seen.has(hash)) {
 				if (!db.has(hash)) {
@@ -48,6 +63,7 @@ class TraverseForward extends Traverse {
 				this.seen.add(hash);
 			}
 		});
+		*/
 	}
 }
 
@@ -65,6 +81,21 @@ class TraverseBackward extends Traverse {
 		}
 
 		const parents = [ trytes.slice(2430, 2511), trytes.slice(2511, 2592) ];
+
+		return parents.reduce((promise, hash) => {
+			return promise.then(async () => {
+				if (!this.seen.has(hash)) {
+					if (hash === '9'.repeat(81)) {
+						traverse.forward.queue.push(hash);
+					} else {
+						this.queue.push(hash);
+						this.seen.add(hash);
+					}
+				}
+			})
+		}, Promise.resolve());
+
+		/*
 		parents.forEach(async hash => {
 			if (!this.seen.has(hash)) {
 				if (hash === '9'.repeat(81)) {
@@ -75,6 +106,7 @@ class TraverseBackward extends Traverse {
 				}
 			}
 		});
+		*/
 	}
 }
 
